@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 )
 
 type User struct {
@@ -15,6 +16,11 @@ type User struct {
 	Name  string `json:"name"`
 	Email string `json:"email"`
 }
+
+const (
+	USERS = "/api/go/users"
+	USER  = "/api/go/users/{id}"
+)
 
 func main() {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
@@ -32,11 +38,11 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/api/go/users", getUsers(db)).Methods("GET")
-	router.HandleFunc("/api/go/users", createUser(db)).Methods("POST")
-	router.HandleFunc("/api/go/users/{id}", getUser(db)).Methods("GET")
-	router.HandleFunc("/api/go/users/{id}", updateUser(db)).Methods("PUT")
-	router.HandleFunc("/api/go/users/{id}", deleteUser(db)).Methods("DELETE")
+	router.HandleFunc(USERS, getUsers(db)).Methods("GET")
+	router.HandleFunc(USERS, createUser(db)).Methods("POST")
+	router.HandleFunc(USER, getUser(db)).Methods("GET")
+	router.HandleFunc(USER, updateUser(db)).Methods("PUT")
+	router.HandleFunc(USER, deleteUser(db)).Methods("DELETE")
 
 	enhancedRouter := enableCORS(jsonContentTypeMiddleware(router))
 

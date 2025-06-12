@@ -1,10 +1,23 @@
 services:
-  go-app:
-    container_name: go-app
-    image: go-app:1.0.0
+  frontend:
+    container_name: frontend_fullstack_app
+    image: frontend-nextjs:1.0.0
+    build:
+      context: ./frontend
+      dockerfile: frontend.dockerfile
+    environment:
+      NEXT_PUBLIC_API_URL: 'http://localhost:8000'
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+
+  backend:
+    container_name: backend_fullstack_app
+    image: backend-go:1.0.0
     build:
       context: ./backend
-      dockerfile: go.dockerfile
+      dockerfile: backend.dockerfile
     environment:
       DATABASE_URL: 'postgres://postgres:postgres@db:5432/postgres?sslmode=disable'
     ports:
@@ -12,7 +25,7 @@ services:
     depends_on:
       - db
   db:
-    container_name: db
+    container_name: db_fullstack_app
     image: postgres:13
     environment:
       POSTGRES_USER: postgres
