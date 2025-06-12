@@ -5,7 +5,6 @@ go 1.24.4
 require (
 	github.com/coder/websocket v1.8.13
 	github.com/shirou/gopsutil/v4 v4.24.7
-	github.com/sigrdrifa/go-htmx-websockets-example v0.0.0-20241104170341-84c05439935b
 )
 
 require (
