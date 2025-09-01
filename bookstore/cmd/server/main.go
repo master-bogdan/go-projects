@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bookstore/src/pkg/routes"
+	"bookstore/internal/routes"
 	"log"
 	"net/http"
 

@@ -1,8 +1,7 @@
-package controllers
+package bookstore
 
 import (
-	"bookstore/src/pkg/models"
-	"bookstore/src/pkg/utils"
+	"bookstore/internal/utils"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -11,10 +10,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var NewBook models.Book
+var NewBook Book
 
 func GetBooks(w http.ResponseWriter, r *http.Request) {
-	newBooks := models.GetAllBooks()
+	newBooks := NewBook.GetAllBooks()
 	res, _ := json.Marshal(newBooks)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -22,7 +21,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request) {
 	w.Write(res)
 }
 
-func GetBookById(w http.ResponseWriter, r *http.Request) {
+func GetBook(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	bookId := vars["bookId"]
 	ID, err := strconv.ParseInt(bookId, 0, 0)
@@ -31,7 +30,7 @@ func GetBookById(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error while parsing in GetBookById")
 	}
 
-	bookDetails, _ := models.GetBookById(ID)
+	bookDetails, _ := NewBook.GetBookById(ID)
 	res, _ := json.Marshal(bookDetails)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -40,7 +39,7 @@ func GetBookById(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateBook(w http.ResponseWriter, r *http.Request) {
-	CreateBook := &models.Book{}
+	CreateBook := &Book{}
 	utils.ParseBody(r, CreateBook)
 	b := CreateBook.CreateBook()
 	res, _ := json.Marshal(b)
@@ -59,7 +58,7 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error while parsing in DeleteBook")
 	}
 
-	book := models.DeleteBook(ID)
+	book := NewBook.Delete(ID)
 	res, _ := json.Marshal(book)
 
 	w.Header().Set("Content-Type", "application/json")
@@ -68,7 +67,7 @@ func DeleteBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func UpdateBook(w http.ResponseWriter, r *http.Request) {
-	var updateBook = &models.Book{}
+	var updateBook = &Book{}
 	utils.ParseBody(r, updateBook)
 	vars := mux.Vars(r)
 	bookId := vars["bookId"]
@@ -79,7 +78,7 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error while parsing in UpdateBook")
 	}
 
-	bookDetails, db := models.GetBookById(ID)
+	bookDetails, db := NewBook.GetBookById(ID)
 
 	if updateBook.Name != "" {
 		bookDetails.Name = updateBook.Name

@@ -1,7 +1,7 @@
-package models
+package bookstore
 
 import (
-	"bookstore/src/pkg/config"
+	"bookstore/config"
 
 	"github.com/jinzhu/gorm"
 )
@@ -28,21 +28,21 @@ func (b *Book) CreateBook() *Book {
 	return b
 }
 
-func GetAllBooks() []Book {
+func (b *Book) GetAllBooks() []Book {
 	var Books []Book
 	db.Find(&Books)
 
 	return Books
 }
 
-func GetBookById(Id int64) (*Book, *gorm.DB) {
+func (b *Book) GetBookById(Id int64) (*Book, *gorm.DB) {
 	var getBook Book
 	db := db.Where("ID=?", Id).Find(&getBook)
 
 	return &getBook, db
 }
 
-func DeleteBook(id int64) Book {
+func (b *Book) Delete(id int64) Book {
 	var book Book
 
 	db.Where("ID=?", id).Delete(book)
