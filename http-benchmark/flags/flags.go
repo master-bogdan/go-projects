@@ -56,6 +56,10 @@ func (f *Flags) ValidateFlags() error {
 	supportedHTTPMethods := []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodDelete}
 	supportedHTTPHeaders := []string{"Content-Type", "Accept", "User-Agent", "Authorization"}
 
+	if f.Url == "" {
+		return errors.New("URL must be present")
+	}
+
 	if f.Concurrency <= 0 {
 		return errors.New("Number of workers can't be less than 0")
 	}

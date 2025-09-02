@@ -32,6 +32,6 @@ func (b *Benchmark) Run() {
 	close(results)
 
 	for res := range results {
-		fmt.Printf("Result: bob %d, latency: %dms, statusCode: %d\n", res.JobID, res.Latency, res.StatusCode)
+		fmt.Printf("Result: job %d, latency: %dms, statusCode: %d\n", res.JobID, res.Latency, res.StatusCode)
 	}
 }

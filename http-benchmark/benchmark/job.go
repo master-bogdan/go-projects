@@ -28,6 +28,10 @@ func (j *Job) New(client *http.Client) (statusCode int, err error) {
 		for _, v := range j.Headers {
 			array := strings.Split(v, ":")
 
+			if len(array) < 2 {
+				continue
+			}
+
 			req.Header.Set(array[0], array[1])
 		}
 	}
@@ -38,8 +42,8 @@ func (j *Job) New(client *http.Client) (statusCode int, err error) {
 		return 0, err
 	}
 
-	_, err = io.ReadAll(resp.Body)
 	defer resp.Body.Close()
+	_, err = io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response:", err)
 		return 0, err
