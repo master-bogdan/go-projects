@@ -1,0 +1,23 @@
+listen: ":8080"
+backends:
+  - "http://b1:9000"
+  - "http://b2:9000"
+  - "http://b3:9000"
+balancer: "least_conn"    # or "round_robin"
+health:
+  path: "/health"
+  interval: 2
+  timeout: 500
+  passiveFailuresForOpen: 5
+  cooldown: 10
+retry:
+  max: 2
+  backoff: 200
+timeout:
+  read: 5
+  write: 30
+  idle: 60
+transport:
+  dialTimeout: 500
+  tlsHandshakeTimeout: 500
+  maxIdlePerHost: 100
