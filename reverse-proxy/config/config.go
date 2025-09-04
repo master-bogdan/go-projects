@@ -2,34 +2,35 @@ package config
 
 import (
 	"os"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	Listen   string
-	Backends []string
-	Balancer string
+	Listen   string   `yaml:"listen"`
+	Backends []string `yaml:"backends"`
+	Balancer string   `yaml:"balancer"`
 	Health   struct {
-		Path                   string
-		Interval               string
-		Timeout                int
-		PassiveFailuresForOpen int
-		Coodown                int
+		Path                   string        `yaml:"path"`
+		Interval               time.Duration `yaml:"interval"`
+		Timeout                int           `yaml:"timeout"`
+		PassiveFailuresForOpen int           `yaml:"passiveFailuresForOpen"`
+		Cooldown               time.Duration `yaml:"cooldown"`
 	}
 	Retry struct {
-		Max     int
-		Backoff int
+		Max     int `yaml:"max"`
+		Backoff int `yaml:"backoff"`
 	}
 	Timeout struct {
-		Read  int
-		Write int
-		Idle  int
+		Read  int `yaml:"read"`
+		Write int `yaml:"write"`
+		Idle  int `yaml:"idle"`
 	}
 	Transport struct {
-		DialTimeout         int
-		TLSHandshakeTimeout int
-		MaxIdlePerHost      int
+		DialTimeout         int `yaml:"dialTimeout"`
+		TLSHandshakeTimeout int `yaml:"tlsHandshakeTimeout"`
+		MaxIdlePerHost      int `yaml:"maxIdlePerHost"`
 	}
 }
 

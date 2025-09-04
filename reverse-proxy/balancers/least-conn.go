@@ -48,6 +48,8 @@ func (b *LeastConnBalancer) OnStart(backend *Backend) {
 
 func (b *LeastConnBalancer) OnFinish(backend *Backend, isSuccess bool, duration time.Duration) {
 	atomic.AddInt64(&backend.ConnCount, -1)
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	if !isSuccess {
 		backend.Failures++
 		backend.LastFailure = time.Now()
