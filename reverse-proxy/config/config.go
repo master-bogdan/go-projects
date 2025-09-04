@@ -40,7 +40,7 @@ func New() *Config {
 	}
 
 	var config Config
-	err = yaml.Unmarshal(file, config)
+	err = yaml.Unmarshal(file, &config)
 	if err != nil {
 		panic(err)
 	}
