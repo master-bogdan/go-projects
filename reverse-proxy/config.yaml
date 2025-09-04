@@ -1,9 +1,7 @@
 listen: ":8080"
 backends:
-  - "http://b1:9000"
-  - "http://b2:9000"
-  - "http://b3:9000"
-balancer: "least_conn"    # or "round_robin"
+  - "http://192.168.49.2:30080"
+balancer: "round_robin"    # or "least_conn"
 health:
   path: "/health"
   interval: 2
