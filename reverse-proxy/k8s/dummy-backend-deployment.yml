@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dummy-backend-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: dummy-backend
+  template:
+    metadata:
+      labels:
+        app: dummy-backend
+    spec:
+      containers:
+        - name: nginxdemos
+          image: nginxdemos/hello:plain-text
+          ports:
+            - containerPort: 80
