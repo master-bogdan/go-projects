@@ -8,6 +8,7 @@ import (
 	"github.com/master-bogdan/ephermal-notes/internal/app"
 	"github.com/master-bogdan/ephermal-notes/internal/infra/db/redis"
 	"github.com/master-bogdan/ephermal-notes/pkg/config"
+	ratelimiter "github.com/master-bogdan/ephermal-notes/pkg/rate_limiter"
 )
 
 func main() {
@@ -30,11 +31,15 @@ func main() {
 
 	app.Init(*App)
 
+	rl := ratelimiter.NewRateLimiter(5, 10*time.Second)
+
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
 	server := http.Server{
 		Addr:        addr,
 		ReadTimeout: 3 * time.Second,
+		Handler:     rl.Middleware(App.Router),
 	}
 
+	log.Printf("Starting server on %s", addr)
 	log.Fatal(server.ListenAndServe())
 }
