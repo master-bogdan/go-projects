@@ -1,7 +1,9 @@
 package ratelimiter
 
 import (
+	"net"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 )
@@ -43,24 +45,51 @@ func (b *bucket) allow() bool {
 	return false
 }
 
-// exported RateLimiter wrapper
+// exported RateLimiter wrapper with per-IP buckets
 type RateLimiter struct {
-	b *bucket
+	mu       sync.Mutex
+	buckets  map[string]*bucket
+	max      int
+	interval time.Duration
 }
 
 func NewRateLimiter(max int, interval time.Duration) *RateLimiter {
 	return &RateLimiter{
-		b: newBucket(max, interval),
+		buckets:  make(map[string]*bucket),
+		max:      max,
+		interval: interval,
 	}
 }
 
-// Middleware wraps an http.Handler
+func (rl *RateLimiter) getBucket(ip string) *bucket {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+
+	b, ok := rl.buckets[ip]
+	if !ok {
+		b = newBucket(rl.max, rl.interval)
+		rl.buckets[ip] = b
+	}
+	return b
+}
+
 func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !rl.b.allow() {
+		if strings.HasPrefix(r.URL.Path, "/swagger/") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ip, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			ip = r.RemoteAddr
+		}
+
+		if !rl.getBucket(ip).allow() {
 			http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
 			return
 		}
+
 		next.ServeHTTP(w, r)
 	})
 }

@@ -29,16 +29,22 @@ func LoadConfig() (*Config, error) {
 	cfg.Server.Host = os.Getenv("SERVER_HOST")
 	cfg.Server.Port = os.Getenv("SERVER_PORT")
 
+	cfg.Db.Redis = redis.Options{
+		Addr:     os.Getenv("REDIS_ADDR"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+	}
+
 	return cfg, nil
 }
 
 func setEnv() {
 	_, filename, _, _ := runtime.Caller(0)
-	root := filepath.Dir(filepath.Dir(filename))
+	root := filepath.Dir(filepath.Dir(filepath.Dir(filename)))
+	envPath := filepath.Join(root, ".env")
 
-	envFile, err := os.Open(root)
+	envFile, err := os.Open(envPath)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to open .env file: %v", err)
 	}
 	defer envFile.Close()
 
@@ -50,7 +56,8 @@ func setEnv() {
 			os.Setenv(parts[0], parts[1])
 		}
 	}
+
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		log.Fatalf("error reading .env file: %v", err)
 	}
 }

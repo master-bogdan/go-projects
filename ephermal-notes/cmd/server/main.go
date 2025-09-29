@@ -11,6 +11,10 @@ import (
 	ratelimiter "github.com/master-bogdan/ephermal-notes/pkg/rate_limiter"
 )
 
+// @title Ephemeral Notes API
+// @version 1.0
+// @description Swagger docs for Ephemeral Notes API.
+// @host localhost:8000
 func main() {
 	cfg, err := config.LoadConfig()
 	if err != nil {
