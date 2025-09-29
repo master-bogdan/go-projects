@@ -39,9 +39,11 @@ func main() {
 
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
 	server := http.Server{
-		Addr:        addr,
-		ReadTimeout: 3 * time.Second,
-		Handler:     rl.Middleware(App.Router),
+		Addr:         addr,
+		ReadTimeout:  3 * time.Second,
+		WriteTimeout: 5 * time.Second,
+		IdleTimeout:  30 * time.Second,
+		Handler:      rl.Middleware(App.Router),
 	}
 
 	log.Printf("Starting server on %s", addr)

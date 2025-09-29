@@ -75,6 +75,8 @@ func (r *notesRepository) Create(note *NotesModel) (*NotesModel, error) {
 		return nil, errors.New("note ID already exists")
 	}
 
+	note.ID = ID
+
 	return note, nil
 }
 
