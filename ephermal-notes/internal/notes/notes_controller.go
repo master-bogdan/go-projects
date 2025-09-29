@@ -32,7 +32,7 @@ func (c *notesController) GetNote(w http.ResponseWriter, r *http.Request) {
 
 	note, err := c.service.GetNote(noteID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusNotFound)
 	}
 
 	w.Header().Set("Content-Type", "application/json")

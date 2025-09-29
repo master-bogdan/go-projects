@@ -1,7 +1,6 @@
-package notes_tests
+package notes_test
 
 import (
-	"context"
 	"os"
 	"testing"
 	"time"
@@ -10,8 +9,6 @@ import (
 	"github.com/master-bogdan/ephermal-notes/internal/notes"
 	"github.com/redis/go-redis/v9"
 )
-
-var ctx = context.Background()
 
 func setupTestRepo(t *testing.T) memory_db.NotesRepository {
 	t.Helper()
