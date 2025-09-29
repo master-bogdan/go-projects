@@ -24,11 +24,13 @@ RUN go build -o /app
 # Use a minimal Alpine image for the final stage
 FROM alpine:3.21
 
+RUN apk add --no-cache ca-certificates
+
 # Copy the compiled binary from the builder stage
-COPY --from=builder /app /bin/app
+COPY --from=builder /app /app
 
 # Expose the port your app listens on (adjust as needed)
 EXPOSE 8000
 
 # Run the application
-CMD ["bin/app"]
+CMD ["/app"]

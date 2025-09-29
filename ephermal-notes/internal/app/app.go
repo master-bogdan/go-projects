@@ -15,7 +15,6 @@ type App struct {
 }
 
 func Init(app App) {
-
 	app.Router.Handle("/swagger/", httpSwagger.WrapHandler)
 
 	notes.RouterNew(app.Router, app.Client)
