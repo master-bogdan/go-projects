@@ -1,13 +1,14 @@
 package main
 
 import (
-	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/master-bogdan/ephermal-notes/internal/app"
 	"github.com/master-bogdan/ephermal-notes/internal/infra/db/redis"
 	"github.com/master-bogdan/ephermal-notes/pkg/config"
+	"github.com/master-bogdan/ephermal-notes/pkg/logger"
 	ratelimiter "github.com/master-bogdan/ephermal-notes/pkg/rate_limiter"
 )
 
@@ -16,14 +17,18 @@ import (
 // @description Swagger docs for Ephemeral Notes API.
 // @host localhost:8000
 func main() {
+	log := logger.InitLogger()
+
 	cfg, err := config.LoadConfig()
 	if err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		log.Error("failed to load config: ", "error", err)
+		os.Exit(1)
 	}
 
 	client, err := memory_db.Connect(cfg)
 	if err != nil {
-		log.Fatalf("failed connect to redis: %v", err)
+		log.Error("failed connect to redis: ", "error", err)
+		os.Exit(1)
 	}
 
 	mux := http.NewServeMux()
@@ -31,11 +36,13 @@ func main() {
 	App := &app.App{
 		Router: mux,
 		Client: client,
+		Logger: log,
 	}
 
 	app.Init(*App)
 
 	rl := ratelimiter.NewRateLimiter(5, 10*time.Second)
+	handler := rl.Middleware(logger.LoggingMiddleware(log, App.Router))
 
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
 	server := http.Server{
@@ -43,9 +50,13 @@ func main() {
 		ReadTimeout:  3 * time.Second,
 		WriteTimeout: 5 * time.Second,
 		IdleTimeout:  30 * time.Second,
-		Handler:      rl.Middleware(App.Router),
+		Handler:      handler,
 	}
 
-	log.Printf("Starting server on %s", addr)
-	log.Fatal(server.ListenAndServe())
+	log.Info("Starting server on", "addr", addr)
+	err = server.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
+		log.Error("server failed", "error", err.Error())
+		os.Exit(1)
+	}
 }

@@ -19,7 +19,7 @@ RUN go mod download
 COPY . .
 
 # Build the Go binary
-RUN go build -o /app
+RUN go build -o /app ./cmd/server
 
 # Use a minimal Alpine image for the final stage
 FROM alpine:3.21
