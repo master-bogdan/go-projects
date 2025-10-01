@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: notes-api-container
-        image: notes-api:latest
+        image: masterbogdan0/ephermal-notes:latest
         resources:
           requests:
             memory: "64Mi"

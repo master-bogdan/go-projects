@@ -58,7 +58,7 @@ test-local:
 # ------------------------
 docker-build:
 	@echo "🐳 Building Docker image..."
-	@docker build -t $(IMAGE_NAME) .
+	@docker build -t $(IMAGE_NAME) -f ./deployments/docker/Dockerfile .
 
 docker-push:
 	@echo "📤 Pushing Docker image..."
