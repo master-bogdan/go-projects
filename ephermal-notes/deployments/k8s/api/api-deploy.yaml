@@ -15,6 +15,7 @@ spec:
       containers:
       - name: notes-api-container
         image: masterbogdan0/ephermal-notes:latest
+        imagePullPolicy: Always
         resources:
           requests:
             memory: "64Mi"

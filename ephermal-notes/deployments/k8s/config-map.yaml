@@ -2,7 +2,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: notes-api-config
-  namespace: dev
 data:
   SERVER_HOST: "0.0.0.0"
   SERVER_PORT: "8000"

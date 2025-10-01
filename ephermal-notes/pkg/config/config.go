@@ -1,12 +1,7 @@
 package config
 
 import (
-	"bufio"
-	"log"
 	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -24,7 +19,7 @@ type Config struct {
 func LoadConfig() (*Config, error) {
 	cfg := &Config{}
 
-	setEnv()
+	// setEnv()
 
 	cfg.Server.Host = os.Getenv("SERVER_HOST")
 	cfg.Server.Port = os.Getenv("SERVER_PORT")
@@ -37,27 +32,27 @@ func LoadConfig() (*Config, error) {
 	return cfg, nil
 }
 
-func setEnv() {
-	_, filename, _, _ := runtime.Caller(0)
-	root := filepath.Dir(filepath.Dir(filepath.Dir(filename)))
-	envPath := filepath.Join(root, ".env")
+// func setEnv() {
+// 	_, filename, _, _ := runtime.Caller(0)
+// 	root := filepath.Dir(filepath.Dir(filepath.Dir(filename)))
+// 	envPath := filepath.Join(root, ".env")
 
-	envFile, err := os.Open(envPath)
-	if err != nil {
-		log.Fatalf("failed to open .env file: %v", err)
-	}
-	defer envFile.Close()
+// 	envFile, err := os.Open(envPath)
+// 	if err != nil {
+// 		log.Fatalf("failed to open .env file: %v", err)
+// 	}
+// 	defer envFile.Close()
 
-	scanner := bufio.NewScanner(envFile)
-	for scanner.Scan() {
-		line := scanner.Text()
-		parts := strings.SplitN(line, "=", 2)
-		if len(parts) == 2 {
-			os.Setenv(parts[0], parts[1])
-		}
-	}
+// 	scanner := bufio.NewScanner(envFile)
+// 	for scanner.Scan() {
+// 		line := scanner.Text()
+// 		parts := strings.SplitN(line, "=", 2)
+// 		if len(parts) == 2 {
+// 			os.Setenv(parts[0], parts[1])
+// 		}
+// 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Fatalf("error reading .env file: %v", err)
-	}
-}
+// 	if err := scanner.Err(); err != nil {
+// 		log.Fatalf("error reading .env file: %v", err)
+// 	}
+// }

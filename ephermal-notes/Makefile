@@ -5,7 +5,7 @@ APP_NAME      := ephermal-notes
 BINARY_NAME   := $(APP_NAME)
 IMAGE_NAME    := $(APP_NAME):latest
 DOCKER_IMAGE  := masterbogdan0/$(APP_NAME):latest
-K8S_NAMESPACE := default
+K8S_NAMESPACE := dev
 
 GOBASE        := $(shell pwd)
 GOBIN         := $(GOBASE)/bin
@@ -69,12 +69,16 @@ docker-push:
 # Kubernetes targets
 # ------------------------
 k8s-deploy:
+	@echo "📦 Creating namespace $(K8S_NAMESPACE)..."
+	minikube kubectl -- create namespace $(K8S_NAMESPACE) || echo "Namespace already exists"
 	@echo "🚀 Deploying to Kubernetes..."
-	kubectl apply -f k8s/ -n $(K8S_NAMESPACE)
+	minikube kubectl -- apply -R -f ./deployments/k8s/ -n $(K8S_NAMESPACE)
+	@echo "📤 Restarting pods..."
+	minikube kubectl -- rollout restart deployment notes-api-deploy -n dev
 
 k8s-delete:
 	@echo "🔥 Deleting from Kubernetes..."
-	kubectl delete -f k8s/ -n $(K8S_NAMESPACE)
+	minikube kubectl -- delete -R -f ./deployments/k8s/ -n $(K8S_NAMESPACE)
 
 # ------------------------
 # Minikube helpers (simulate prod)
