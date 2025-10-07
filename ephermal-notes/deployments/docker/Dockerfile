@@ -1,4 +1,4 @@
-# Use the official Golang 1.24 Alpine image as the build stage
+# Use the official Golang 1.25 Alpine image as the build stage
 FROM golang:1.25-alpine AS builder
 
 # Set environment variables for static build
@@ -9,6 +9,9 @@ ENV CGO_ENABLED=0 \
 # Set working directory inside container
 WORKDIR /build
 
+# Install swag CLI for Swagger doc generation
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
 # Copy go.mod and go.sum to cache dependencies
 COPY go.mod go.sum ./
 
@@ -17,6 +20,9 @@ RUN go mod download
 
 # Copy the entire source code
 COPY . .
+
+# Generate Swagger docs automatically
+RUN /go/bin/swag init -g cmd/server/main.go -o pkg/docs
 
 # Build the Go binary
 RUN go build -o /app ./cmd/server
@@ -28,6 +34,7 @@ RUN apk add --no-cache ca-certificates
 
 # Copy the compiled binary from the builder stage
 COPY --from=builder /app /app
+COPY --from=builder /build/pkg/docs /pkg/docs
 
 # Expose the port your app listens on (adjust as needed)
 EXPOSE 8000

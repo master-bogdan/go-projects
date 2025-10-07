@@ -32,14 +32,14 @@ spec:
               name: redis-secret
         readinessProbe:
           httpGet:
-            path: /api/v1/health
+            path: /api/v1/health/readyz
             port: 8000
           initialDelaySeconds: 5
           periodSeconds: 5
           timeoutSeconds: 2
         livenessProbe:
           httpGet:
-            path: /api/v1/health
+            path: /api/v1/health/healthz
             port: 8000
           initialDelaySeconds: 15
           periodSeconds: 10

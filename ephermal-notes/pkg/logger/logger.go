@@ -98,9 +98,30 @@ func isTerminal(f *os.File) bool {
 	return (fi.Mode() & os.ModeCharDevice) != 0
 }
 
+type responseRecorder struct {
+	http.ResponseWriter
+	status int
+	size   int
+}
+
+func (r *responseRecorder) WriteHeader(statusCode int) {
+	r.status = statusCode
+	r.ResponseWriter.WriteHeader(statusCode)
+}
+
+func (r *responseRecorder) Write(b []byte) (int, error) {
+	if r.status == 0 {
+		r.status = http.StatusOK
+	}
+	n, err := r.ResponseWriter.Write(b)
+	r.size += n
+	return n, err
+}
+
 func LoggingMiddleware(logger *slog.Logger, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
+		rec := &responseRecorder{ResponseWriter: w}
 
 		logger.Info("incoming request",
 			"method", r.Method,
@@ -108,12 +129,15 @@ func LoggingMiddleware(logger *slog.Logger, next http.Handler) http.Handler {
 			"remote", r.RemoteAddr,
 		)
 
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(rec, r)
 
+		duration := time.Since(start)
 		logger.Info("request completed",
 			"method", r.Method,
 			"path", r.URL.Path,
-			"duration", time.Since(start),
+			"status", rec.status,
+			"size", rec.size,
+			"duration_ms", duration.Milliseconds(),
 		)
 	})
 }

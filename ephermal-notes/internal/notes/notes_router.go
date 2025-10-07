@@ -13,7 +13,7 @@ func RouterNew(m *http.ServeMux, client *redis.Client, logger *slog.Logger) {
 	service := NewNotesService(repo)
 	controller := NewNotesController(service)
 
-	m.HandleFunc("GET /notes/{id}", controller.GetNote)
-	m.HandleFunc("POST /notes", controller.CreateNote)
-	m.HandleFunc("DELETE /notes/{id}", controller.DeleteNote)
+	m.HandleFunc("GET /api/v1/notes/{id}", controller.GetNote)
+	m.HandleFunc("POST /api/v1/notes", controller.CreateNote)
+	m.HandleFunc("DELETE /api/v1/notes/{id}", controller.DeleteNote)
 }

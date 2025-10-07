@@ -16,6 +16,7 @@ import (
 // @version 1.0
 // @description Swagger docs for Ephemeral Notes API.
 // @host localhost:8000
+// @BasePath /api/v1
 func main() {
 	log := logger.InitLogger()
 
