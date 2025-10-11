@@ -5,4 +5,4 @@ metadata:
 data:
   SERVER_HOST: "0.0.0.0"
   SERVER_PORT: "8000"
-  REDIS_ADDR: "redis-service:6379"
+  REDIS_ADDR: "redis-service.db.svc.cluster.local:6379"

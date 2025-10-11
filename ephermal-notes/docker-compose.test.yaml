@@ -1,17 +1,6 @@
 version: '3.8'
 
 services:
-  backend:
-    container_name: ephemeral_notes_api
-    build:
-      context: .
-      dockerfile: ./deployments/docker/Dockerfile
-    env_file: ./.env
-    ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
-    depends_on: 
-      - redis
-
   redis:
     image: redis:latest
     container_name: redis

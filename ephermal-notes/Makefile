@@ -5,15 +5,21 @@ APP_NAME      := ephermal-notes
 BINARY_NAME   := $(APP_NAME)
 IMAGE_NAME    := $(APP_NAME):latest
 DOCKER_IMAGE  := masterbogdan0/$(APP_NAME):latest
-K8S_NAMESPACE := dev
+
+K8S_NAMESPACE_APP := dev
+K8S_NAMESPACE_DB  := db
+K8S_NAMESPACE_OBS := observability
 
 GOBASE        := $(shell pwd)
 GOBIN         := $(GOBASE)/bin
 
+.PHONY: all build clean run test lint docker-build docker-push \
+        k8s-deploy-app k8s-deploy-db k8s-deploy-observability \
+        k8s-deploy k8s-delete minikube-deploy
+
 # ------------------------
 # Go targets
 # ------------------------
-.PHONY: all build clean run test lint docker-build docker-push k8s-deploy k8s-delete
 
 all: clean build
 
@@ -68,17 +74,33 @@ docker-push:
 # ------------------------
 # Kubernetes targets
 # ------------------------
-k8s-deploy:
-	@echo "📦 Creating namespace $(K8S_NAMESPACE)..."
-	minikube kubectl -- create namespace $(K8S_NAMESPACE) || echo "Namespace already exists"
-	@echo "🚀 Deploying to Kubernetes..."
-	minikube kubectl -- apply -R -f ./deployments/k8s/ -n $(K8S_NAMESPACE)
+k8s-deploy-app:
+	@echo "📦 Creating namespace $(K8S_NAMESPACE_APP)..."
+	minikube kubectl -- create namespace $(K8S_NAMESPACE_APP) || echo "Namespace already exists"
+	@echo "🚀 Deploying APP to Kubernetes..."
+	minikube kubectl -- apply -R -f ./deployments/k8s/app -n $(K8S_NAMESPACE_APP)
 	@echo "📤 Restarting pods..."
-	minikube kubectl -- rollout restart deployment notes-api-deploy -n dev
+	minikube kubectl -- rollout restart deployment notes-api-deploy -n $(K8S_NAMESPACE_APP)
+
+k8s-deploy-db:
+	@echo "📦 Creating namespace $(K8S_NAMESPACE_DB)..."
+	minikube kubectl -- create namespace $(K8S_NAMESPACE_DB) || echo "Namespace already exists"
+	@echo "🚀 Deploying DB to Kubernetes..."
+	minikube kubectl -- apply -R -f ./deployments/k8s/db -n $(K8S_NAMESPACE_DB)
+	@echo "📤 Restarting pods..."
+	minikube kubectl -- rollout restart deployment redis-deploy -n $(K8S_NAMESPACE_DB)
+
+k8s-deploy-observability:
+	@echo "📦 Creating namespace $(K8S_NAMESPACE_OBS)..."
+	minikube kubectl -- create namespace $(K8S_NAMESPACE_OBS) || echo "Namespace already exists"
+	@echo "🚀 Deploying Observability to Kubernetes..."
+	minikube kubectl -- apply -R -f ./deployments/k8s/observability -n $(K8S_NAMESPACE_OBS)
+
+k8s-deploy: k8s-deploy-db k8s-deploy-app k8s-deploy-observability
 
 k8s-delete:
 	@echo "🔥 Deleting from Kubernetes..."
-	minikube kubectl -- delete -R -f ./deployments/k8s/ -n $(K8S_NAMESPACE)
+	minikube kubectl -- delete -R -f ./deployments/k8s/ -n $(K8S_NAMESPACE_APP)
 
 # ------------------------
 # Minikube helpers (simulate prod)
