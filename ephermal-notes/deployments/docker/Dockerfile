@@ -1,5 +1,5 @@
-# Use the official Golang 1.25 Alpine image as the build stage
-FROM golang:1.25-alpine AS builder
+# Use the official Golang image matching go.mod
+FROM golang:1.24-alpine AS builder
 
 # Set environment variables for static build
 ENV CGO_ENABLED=0 \
@@ -24,8 +24,8 @@ COPY . .
 # Generate Swagger docs automatically
 RUN /go/bin/swag init -g cmd/server/main.go -o pkg/docs
 
-# Build the Go binary
-RUN go build -o /app ./cmd/server
+# Build statically linked binary
+RUN go build -trimpath -ldflags="-s -w" -o /app/server ./cmd/server
 
 # Use a minimal Alpine image for the final stage
 FROM alpine:3.21
@@ -33,11 +33,11 @@ FROM alpine:3.21
 RUN apk add --no-cache ca-certificates
 
 # Copy the compiled binary from the builder stage
-COPY --from=builder /app /app
+COPY --from=builder /app/server /app/server
 COPY --from=builder /build/pkg/docs /pkg/docs
 
 # Expose the port your app listens on (adjust as needed)
 EXPOSE 8000
 
 # Run the application
-CMD ["/app"]
+CMD ["/app/server"]

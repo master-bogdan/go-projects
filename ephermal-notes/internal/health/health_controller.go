@@ -32,15 +32,20 @@ func (c *healthController) getReadyz(w http.ResponseWriter, r *http.Request) {
 
 	if err := c.client.Ping(ctx).Err(); err != nil {
 		c.logger.Error("readiness check failed", "component", "redis", "error", err)
-		http.Error(w, `{"status":"unhealthy","component":"redis"}`, http.StatusServiceUnavailable)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		_, _ = w.Write([]byte(`{"status":"unhealthy","component":"redis"}`))
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(`{"status":"ready"}`))
 }
 
 func (c *healthController) getHealthz(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte(`{"status":"ok"}`))
 }

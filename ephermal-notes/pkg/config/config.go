@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"os"
 
 	"github.com/redis/go-redis/v9"
@@ -23,6 +24,10 @@ func LoadConfig() (*Config, error) {
 
 	cfg.Server.Host = os.Getenv("SERVER_HOST")
 	cfg.Server.Port = os.Getenv("SERVER_PORT")
+
+	if cfg.Server.Host == "" || cfg.Server.Port == "" {
+		return nil, errors.New("missing host or port")
+	}
 
 	cfg.Db.Redis = redis.Options{
 		Addr:     os.Getenv("REDIS_ADDR"),

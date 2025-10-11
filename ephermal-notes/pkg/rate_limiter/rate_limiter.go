@@ -61,6 +61,26 @@ func NewRateLimiter(max int, interval time.Duration) *RateLimiter {
 	}
 }
 
+func clientIP(r *http.Request) string {
+	// X-Forwarded-For can contain multiple IPs: client, proxies...
+	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+		parts := strings.Split(xff, ",")
+		if ip := strings.TrimSpace(parts[0]); ip != "" {
+			return ip
+		}
+	}
+
+	if xrip := r.Header.Get("X-Real-IP"); xrip != "" {
+		return strings.TrimSpace(xrip)
+	}
+
+	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		return r.RemoteAddr
+	}
+	return ip
+}
+
 func (rl *RateLimiter) getBucket(ip string) *bucket {
 	rl.mu.Lock()
 	defer rl.mu.Unlock()
@@ -80,11 +100,7 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ip, _, err := net.SplitHostPort(r.RemoteAddr)
-		if err != nil {
-			ip = r.RemoteAddr
-		}
-
+		ip := clientIP(r)
 		if !rl.getBucket(ip).allow() {
 			http.Error(w, "Too Many Requests", http.StatusTooManyRequests)
 			return

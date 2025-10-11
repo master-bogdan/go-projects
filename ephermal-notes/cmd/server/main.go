@@ -7,6 +7,7 @@ import (
 
 	"github.com/master-bogdan/ephermal-notes/internal/app"
 	"github.com/master-bogdan/ephermal-notes/internal/infra/db/redis"
+	"github.com/master-bogdan/ephermal-notes/internal/infra/metrics"
 	"github.com/master-bogdan/ephermal-notes/pkg/config"
 	"github.com/master-bogdan/ephermal-notes/pkg/logger"
 	ratelimiter "github.com/master-bogdan/ephermal-notes/pkg/rate_limiter"
@@ -42,7 +43,7 @@ func main() {
 	app.Init(*App)
 
 	rl := ratelimiter.NewRateLimiter(5, 10*time.Second)
-	handler := rl.Middleware(logger.LoggingMiddleware(log, App.Router))
+	handler := metrics.Middleware(rl.Middleware(logger.LoggingMiddleware(log, App.Router)))
 
 	addr := cfg.Server.Host + ":" + cfg.Server.Port
 	server := http.Server{

@@ -3,6 +3,7 @@ package notes
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	memory_db "github.com/master-bogdan/ephermal-notes/internal/infra/db/redis"
 )
@@ -37,14 +38,18 @@ func NewNotesController(service NotesService) NotesController {
 func (c *notesController) GetNote(w http.ResponseWriter, r *http.Request) {
 	noteID := r.PathValue("id")
 	if noteID == "" {
-		http.Error(w, "Invalid note ID", http.StatusBadRequest)
+		WriteJSONError(w, http.StatusBadRequest, "invalid note ID")
 		return
 	}
 
 	note, err := c.service.GetNote(noteID)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusNotFound)
-
+		if strings.Contains(strings.ToLower(err.Error()), "not found") ||
+			strings.Contains(strings.ToLower(err.Error()), "consumed") {
+			WriteJSONError(w, http.StatusNotFound, "note not found")
+			return
+		}
+		WriteJSONError(w, http.StatusInternalServerError, "failed to get note")
 		return
 	}
 
@@ -52,7 +57,7 @@ func (c *notesController) GetNote(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode(note)
 	if err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		WriteJSONError(w, http.StatusInternalServerError, "failed to encode response")
 	}
 }
 
@@ -78,18 +83,22 @@ func (c *notesController) CreateNote(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(noteDTO)
 	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		WriteJSONError(w, http.StatusBadRequest, "Invalid JSON")
 		return
 	}
 
-	// change to dto later
+	if strings.TrimSpace(noteDTO.Message) == "" {
+		WriteJSONError(w, http.StatusBadRequest, "Message is required")
+		return
+	}
+
 	note := &memory_db.NotesModel{
 		Message: noteDTO.Message,
 	}
 
 	createdNote, err := c.service.CreateNote(note)
 	if err != nil {
-		http.Error(w, "Failed to create note", http.StatusInternalServerError)
+		WriteJSONError(w, http.StatusInternalServerError, "Failed to create note")
 		return
 	}
 
@@ -97,7 +106,8 @@ func (c *notesController) CreateNote(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	err = json.NewEncoder(w).Encode(createdNote)
 	if err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		WriteJSONError(w, http.StatusInternalServerError, "Failed to encode response")
+		return
 	}
 }
 
@@ -115,13 +125,13 @@ func (c *notesController) CreateNote(w http.ResponseWriter, r *http.Request) {
 func (c *notesController) DeleteNote(w http.ResponseWriter, r *http.Request) {
 	noteID := r.PathValue("id")
 	if noteID == "" {
-		http.Error(w, "Invalid note ID", http.StatusBadRequest)
+		WriteJSONError(w, http.StatusBadRequest, "Invalid note ID")
 		return
 	}
 
 	err := c.service.DeleteNote(noteID)
 	if err != nil {
-		http.Error(w, "Failed to delete note", http.StatusInternalServerError)
+		WriteJSONError(w, http.StatusInternalServerError, "Failed to delete note")
 		return
 	}
 

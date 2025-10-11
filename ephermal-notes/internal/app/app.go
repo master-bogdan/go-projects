@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/master-bogdan/ephermal-notes/internal/health"
+	"github.com/master-bogdan/ephermal-notes/internal/infra/metrics"
 	"github.com/master-bogdan/ephermal-notes/internal/notes"
 	_ "github.com/master-bogdan/ephermal-notes/pkg/docs"
 	"github.com/redis/go-redis/v9"
@@ -19,6 +20,7 @@ type App struct {
 
 func Init(app App) {
 	app.Router.Handle("/swagger/", httpSwagger.WrapHandler)
+	app.Router.Handle("/metrics", metrics.Handler())
 
 	health.RouterNew(app.Router, app.Client, app.Logger)
 	notes.RouterNew(app.Router, app.Client, app.Logger)
